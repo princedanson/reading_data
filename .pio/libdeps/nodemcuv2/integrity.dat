@@ -1,0 +1,5 @@
+ESP8266HTTPClient
+ESP8266WiFi
+ArduinoJson@6.21.2
+MFRC522@1.4.10
+WiFiManager
