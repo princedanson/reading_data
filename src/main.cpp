@@ -9,7 +9,8 @@
 #include <ESP8266WiFiMulti.h>
 #include <WiFiManager.h>
 #include <WiFiClientSecure.h>
-
+#include <ctype.h>
+#include  <string>
 
 #define  RST D1
 #define SS_PIN D2
@@ -22,6 +23,8 @@ MFRC522 mfrc522(SS_PIN,RST);
 ESP8266WiFiMulti WiFiMulti;
 WiFiManager wifi;
 void strclean (unsigned char* src);
+void printHex(byte *buffer, byte bufferSize);
+void array_to_string(byte array[], unsigned int len, char buffer[]);
 
 
 typedef unsigned char byte;
@@ -33,9 +36,11 @@ typedef struct {
   byte security[SIZE];
   byte exp_month[3];
   byte exp_year[SIZE];
+  char uid[32];
+  long int price;
 
 }id;
-char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/WeatherForecast";
+char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/signUp";
 
 void setup() {
   Serial.begin(115200);
@@ -268,6 +273,17 @@ void loop() {
         Serial.printf("Card Read %s\n\n",person->exp_year);
       }
 
+      memcpy(person->uid,mfrc522.uid.uidByte,mfrc522.uid.size);
+      array_to_string(mfrc522.uid.uidByte,mfrc522.uid.size,person->uid);
+      
+      Serial.println(person->uid);
+      printHex(mfrc522.uid.uidByte,mfrc522.uid.size);
+      
+
+
+   
+      
+
     delay(1000);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
@@ -275,6 +291,8 @@ void loop() {
     Serial.printf(" User name: %s %s %s\n",person->sname,person->fname,person->lname);
     Serial.printf(" Account no: %s\n",person->account);
     Serial.printf(" Secutity Code: %s\n",person->security);
+    Serial.println();
+    Serial.printf("UID %s\n",person->uid);
     Serial.printf(" Expiration Date: %s\\%s \n",person->exp_month,person->exp_year);
     Serial.println("*****************************************************************");
     String  name[30];
@@ -304,17 +322,17 @@ void loop() {
     StaticJsonDocument<200> into;
     //sonObject obj = into.as<char>();
 
-    into["sname"].set(person->sname);
-    into["fname"].set(person->fname);
-    into["lname"].set(person->lname);
-    into["account"].set(person->account);
-    into["year"].set(person->exp_year);
-    into["month"].set(person->exp_month);
-    into["security"].set(person->security);
-    byte output2[128];
+    into["email"].set(person->sname);
+    into["userName"].set(person->uid);
+    into["password"].set("Daniel@o14o");
+    into["confirmPassword"].set("Daniel@o14o");
+    //into["year"].set(person->exp_year);
+    //into["month"].set(person->exp_month);
+    //into["security"].set(person->security);
+    String output2;
 
     serializeJsonPretty(into,output2);
-    Serial.printf("%s",output2);
+    Serial.print(output2);
     int lenh = measureJsonPretty(into);
     Serial.println();
     Serial.println(lenh);
@@ -327,11 +345,20 @@ WiFiClient client;
      //client->setInsecure();  
    
     Serial.print("[HTTPS] begin...\n");
+    String keyi ="emmanuel";
+      keyi = "Bearer "+ keyi;
     if (https.begin(client, address)) {
+      https.addHeader("Content-Type", "application/json");
+      https.addHeader("Authorization","12345abcdef");
+      //https.addHeader("server","Microsoft-IIS/10.0");
+      //https.addHeader("Content-Length",String(lenh));
+      //https.addHeader("Connection","keep-alive");
+      //https.addHeader(" transfer-encoding","chunked");
+      //https.addHeader(" x-powered-by","ASP.NET");
         // HTTPS
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
-      int httpCode = https.GET();
+      int httpCode = https.POST(output2);
 
       // httpCode will be negative on error
       if (httpCode > 0) {
@@ -345,7 +372,11 @@ WiFiClient client;
         }
       } else {
         Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+        String payload = https.getString();
+        Serial.println(payload);
+        
       }
+      
 
       https.end();
     } else {
@@ -363,7 +394,6 @@ void strclean (unsigned char * src) {
     // Process every source character.
     
       unsigned char *dst = src;
-    
 
     while (*src) {
         // Only copy (and update destination pointer) if suitable.
@@ -377,4 +407,30 @@ void strclean (unsigned char * src) {
     // Finalise destination string.
 
     *dst = '\0';
+}
+      void printHex(byte *buffer, byte bufferSize) {
+  for (byte i = 0; i < bufferSize; i++) {
+    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+    Serial.print(buffer[i],HEX);
+  }
+      }
+
+std::string byteToString(const unsigned char* byteArray, size_t len) {
+    char* str = new char[len + 1];
+    memcpy(str, byteArray, len);
+    str[len] = '\0';
+    std::string result(str);
+    delete[] str;
+    return result;
+}
+void array_to_string(byte array[], unsigned int len, char buffer[])
+{
+   for (unsigned int i = 0; i < len; i++)
+   {
+      byte nib1 = (array[i] >> 4) & 0x0F;
+      byte nib2 = (array[i] >> 0) & 0x0F;
+      buffer[i*2+0] = nib1  < 0xA ? '0' + nib1  : 'A' + nib1  - 0xA;
+      buffer[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
+   }
+   buffer[len*2] = '\0';
 }
