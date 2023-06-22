@@ -9,12 +9,10 @@
 #include <ESP8266WiFiMulti.h>
 #include <WiFiManager.h>
 #include <WiFiClientSecure.h>
-<<<<<<< HEAD
 
-=======
 #include <ctype.h>
 #include  <string>
->>>>>>> f30bd50 (first commit)
+
 
 #define  RST D1
 #define SS_PIN D2
@@ -27,11 +25,10 @@ MFRC522 mfrc522(SS_PIN,RST);
 ESP8266WiFiMulti WiFiMulti;
 WiFiManager wifi;
 void strclean (unsigned char* src);
-<<<<<<< HEAD
-=======
+
 void printHex(byte *buffer, byte bufferSize);
 void array_to_string(byte array[], unsigned int len, char buffer[]);
->>>>>>> f30bd50 (first commit)
+
 
 
 typedef unsigned char byte;
@@ -43,17 +40,17 @@ typedef struct {
   byte security[SIZE];
   byte exp_month[3];
   byte exp_year[SIZE];
-<<<<<<< HEAD
+
 
 }id;
 char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/WeatherForecast";
-=======
+
   char uid[32];
   long int price;
 
 }id;
 char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/signUp";
->>>>>>> f30bd50 (first commit)
+
 
 void setup() {
   Serial.begin(115200);
@@ -286,8 +283,7 @@ void loop() {
         Serial.printf("Card Read %s\n\n",person->exp_year);
       }
 
-<<<<<<< HEAD
-=======
+
       memcpy(person->uid,mfrc522.uid.uidByte,mfrc522.uid.size);
       array_to_string(mfrc522.uid.uidByte,mfrc522.uid.size,person->uid);
       
@@ -299,7 +295,7 @@ void loop() {
    
       
 
->>>>>>> f30bd50 (first commit)
+
     delay(1000);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
@@ -307,11 +303,10 @@ void loop() {
     Serial.printf(" User name: %s %s %s\n",person->sname,person->fname,person->lname);
     Serial.printf(" Account no: %s\n",person->account);
     Serial.printf(" Secutity Code: %s\n",person->security);
-<<<<<<< HEAD
-=======
+
     Serial.println();
     Serial.printf("UID %s\n",person->uid);
->>>>>>> f30bd50 (first commit)
+
     Serial.printf(" Expiration Date: %s\\%s \n",person->exp_month,person->exp_year);
     Serial.println("*****************************************************************");
     String  name[30];
@@ -341,7 +336,7 @@ void loop() {
     StaticJsonDocument<200> into;
     //sonObject obj = into.as<char>();
 
-<<<<<<< HEAD
+
     into["sname"].set(person->sname);
     into["fname"].set(person->fname);
     into["lname"].set(person->lname);
@@ -353,7 +348,7 @@ void loop() {
 
     serializeJsonPretty(into,output2);
     Serial.printf("%s",output2);
-=======
+
     into["email"].set(person->sname);
     into["userName"].set(person->uid);
     into["password"].set("Daniel@o14o");
@@ -365,7 +360,7 @@ void loop() {
 
     serializeJsonPretty(into,output2);
     Serial.print(output2);
->>>>>>> f30bd50 (first commit)
+
     int lenh = measureJsonPretty(into);
     Serial.println();
     Serial.println(lenh);
@@ -378,13 +373,13 @@ WiFiClient client;
      //client->setInsecure();  
    
     Serial.print("[HTTPS] begin...\n");
-<<<<<<< HEAD
+
     if (https.begin(client, address)) {
         // HTTPS
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
       int httpCode = https.GET();
-=======
+
     String keyi ="emmanuel";
       keyi = "Bearer "+ keyi;
     if (https.begin(client, address)) {
@@ -399,7 +394,7 @@ WiFiClient client;
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
       int httpCode = https.POST(output2);
->>>>>>> f30bd50 (first commit)
+
 
       // httpCode will be negative on error
       if (httpCode > 0) {
@@ -413,15 +408,15 @@ WiFiClient client;
         }
       } else {
         Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
-<<<<<<< HEAD
+
       }
-=======
+
         String payload = https.getString();
         Serial.println(payload);
         
       }
       
->>>>>>> f30bd50 (first commit)
+//
 
       https.end();
     } else {
@@ -453,8 +448,7 @@ void strclean (unsigned char * src) {
     // Finalise destination string.
 
     *dst = '\0';
-<<<<<<< HEAD
-=======
+//
 }
       void printHex(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
@@ -481,5 +475,5 @@ void array_to_string(byte array[], unsigned int len, char buffer[])
       buffer[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
    }
    buffer[len*2] = '\0';
->>>>>>> f30bd50 (first commit)
+
 }
