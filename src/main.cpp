@@ -9,8 +9,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <WiFiManager.h>
 #include <WiFiClientSecure.h>
-#include <ctype.h>
-#include  <string>
+
 
 #define  RST D1
 #define SS_PIN D2
@@ -26,6 +25,10 @@ void strclean (unsigned char* src);
 void printHex(byte *buffer, byte bufferSize);
 void array_to_string(byte array[], unsigned int len, char buffer[]);
 
+void printHex(byte *buffer, byte bufferSize);
+void array_to_string(byte array[], unsigned int len, char buffer[]);
+
+
 
 typedef unsigned char byte;
 typedef struct {
@@ -39,8 +42,16 @@ typedef struct {
   char uid[32];
   long int price;
 
+
 }id;
 char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/signUp";
+
+  char uid[32];
+  long int price;
+
+}id;
+char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/signUp";
+
 
 void setup() {
   Serial.begin(115200);
@@ -273,6 +284,7 @@ void loop() {
         Serial.printf("Card Read %s\n\n",person->exp_year);
       }
 
+
       memcpy(person->uid,mfrc522.uid.uidByte,mfrc522.uid.size);
       array_to_string(mfrc522.uid.uidByte,mfrc522.uid.size,person->uid);
       
@@ -284,6 +296,7 @@ void loop() {
    
       
 
+
     delay(1000);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
@@ -291,8 +304,7 @@ void loop() {
     Serial.printf(" User name: %s %s %s\n",person->sname,person->fname,person->lname);
     Serial.printf(" Account no: %s\n",person->account);
     Serial.printf(" Secutity Code: %s\n",person->security);
-    Serial.println();
-    Serial.printf("UID %s\n",person->uid);
+
     Serial.printf(" Expiration Date: %s\\%s \n",person->exp_month,person->exp_year);
     Serial.println("*****************************************************************");
     String  name[30];
@@ -321,18 +333,6 @@ void loop() {
     //Serial.print( input);
     StaticJsonDocument<200> into;
     //sonObject obj = into.as<char>();
-
-    into["email"].set(person->sname);
-    into["userName"].set(person->uid);
-    into["password"].set("Daniel@o14o");
-    into["confirmPassword"].set("Daniel@o14o");
-    //into["year"].set(person->exp_year);
-    //into["month"].set(person->exp_month);
-    //into["security"].set(person->security);
-    String output2;
-
-    serializeJsonPretty(into,output2);
-    Serial.print(output2);
     int lenh = measureJsonPretty(into);
     Serial.println();
     Serial.println(lenh);
@@ -345,8 +345,6 @@ WiFiClient client;
      //client->setInsecure();  
    
     Serial.print("[HTTPS] begin...\n");
-    String keyi ="emmanuel";
-      keyi = "Bearer "+ keyi;
     if (https.begin(client, address)) {
       https.addHeader("Content-Type", "application/json");
       https.addHeader("Authorization","12345abcdef");
@@ -360,24 +358,25 @@ WiFiClient client;
       // start connection and send HTTP header
       int httpCode = https.POST(output2);
 
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
-
-        // file found at server
+    String keyi ="emmanuel";
+      keyi = "Bearer "+ keyi;
+    if (https.begin(client, address)) {
+      https.addHeader("Content-Type", "application/json");
+      https.addHeader("Authorization","12345abcdef");
+        // HTTPS
+      Serial.print("[HTTPS] GET...\n");
+      // start connection and send HTTP header        // file found at server
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           String payload = https.getString();
           Serial.println(payload);
         }
       } else {
         Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+
         String payload = https.getString();
         Serial.println(payload);
         
       }
-      
-
       https.end();
     } else {
       Serial.printf("[HTTPS] Unable to connect\n");
@@ -433,4 +432,5 @@ void array_to_string(byte array[], unsigned int len, char buffer[])
       buffer[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
    }
    buffer[len*2] = '\0';
+
 }
