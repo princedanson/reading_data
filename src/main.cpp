@@ -10,9 +10,6 @@
 #include <WiFiManager.h>
 #include <WiFiClientSecure.h>
 
-#include <ctype.h>
-#include  <string>
-
 
 #define  RST D1
 #define SS_PIN D2
@@ -25,6 +22,8 @@ MFRC522 mfrc522(SS_PIN,RST);
 ESP8266WiFiMulti WiFiMulti;
 WiFiManager wifi;
 void strclean (unsigned char* src);
+void printHex(byte *buffer, byte bufferSize);
+void array_to_string(byte array[], unsigned int len, char buffer[]);
 
 void printHex(byte *buffer, byte bufferSize);
 void array_to_string(byte array[], unsigned int len, char buffer[]);
@@ -40,10 +39,12 @@ typedef struct {
   byte security[SIZE];
   byte exp_month[3];
   byte exp_year[SIZE];
+  char uid[32];
+  long int price;
 
 
 }id;
-char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/WeatherForecast";
+char address[]="http://paywave-dev.eba-ypxxxpkf.us-east-1.elasticbeanstalk.com/signUp";
 
   char uid[32];
   long int price;
@@ -304,9 +305,6 @@ void loop() {
     Serial.printf(" Account no: %s\n",person->account);
     Serial.printf(" Secutity Code: %s\n",person->security);
 
-    Serial.println();
-    Serial.printf("UID %s\n",person->uid);
-
     Serial.printf(" Expiration Date: %s\\%s \n",person->exp_month,person->exp_year);
     Serial.println("*****************************************************************");
     String  name[30];
@@ -335,32 +333,6 @@ void loop() {
     //Serial.print( input);
     StaticJsonDocument<200> into;
     //sonObject obj = into.as<char>();
-
-
-    into["sname"].set(person->sname);
-    into["fname"].set(person->fname);
-    into["lname"].set(person->lname);
-    into["account"].set(person->account);
-    into["year"].set(person->exp_year);
-    into["month"].set(person->exp_month);
-    into["security"].set(person->security);
-    byte output2[128];
-
-    serializeJsonPretty(into,output2);
-    Serial.printf("%s",output2);
-
-    into["email"].set(person->sname);
-    into["userName"].set(person->uid);
-    into["password"].set("Daniel@o14o");
-    into["confirmPassword"].set("Daniel@o14o");
-    //into["year"].set(person->exp_year);
-    //into["month"].set(person->exp_month);
-    //into["security"].set(person->security);
-    String output2;
-
-    serializeJsonPretty(into,output2);
-    Serial.print(output2);
-
     int lenh = measureJsonPretty(into);
     Serial.println();
     Serial.println(lenh);
@@ -373,55 +345,27 @@ WiFiClient client;
      //client->setInsecure();  
    
     Serial.print("[HTTPS] begin...\n");
-
     if (https.begin(client, address)) {
+      https.addHeader("Content-Type", "application/json");
+      https.addHeader("Authorization","12345abcdef");
+      //https.addHeader("server","Microsoft-IIS/10.0");
+      //https.addHeader("Content-Length",String(lenh));
+      //https.addHeader("Connection","keep-alive");
+      //https.addHeader(" transfer-encoding","chunked");
+      //https.addHeader(" x-powered-by","ASP.NET");
         // HTTPS
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
-      int httpCode = https.GET();
+      int httpCode = https.POST(output2);
 
     String keyi ="emmanuel";
       keyi = "Bearer "+ keyi;
     if (https.begin(client, address)) {
       https.addHeader("Content-Type", "application/json");
       https.addHeader("Authorization","12345abcdef");
-<<<<<<< Updated upstream
-      //https.addHeader("server","Microsoft-IIS/10.0");
-      //https.addHeader("Content-Length",String(lenh));
-      //https.addHeader("Connection","keep-alive");
-      //https.addHeader(" transfer-encoding","chunked");
-      //https.addHeader(" x-powered-by","ASP.NET");
-=======
-      https.addHeader("server","Microsoft-IIS/10.0");
-      https.addHeader("Content-Length",String(lenh));
-      https.addHeader("Connection","keep-alive");
-      https.addHeader(" transfer-encoding","chunked");
-      https.addHeader(" x-powered-by","ASP.NET");
-
->>>>>>> Stashed changes
         // HTTPS
       Serial.print("[HTTPS] GET...\n");
-      // start connection and send HTTP header
-<<<<<<< Updated upstream
-      int httpCode = https.POST(output2);
-
-
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
-
-=======
-      int httpCode = https.sendRequest("PUT",output2);
-    
-      Serial.println(httpCode);
-
-      // httpCode will be negative on error
-      if (httpCode > 0) {
-
-          
->>>>>>> Stashed changes
-        // file found at server
+      // start connection and send HTTP header        // file found at server
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           String payload = https.getString();
           Serial.println(payload);
@@ -429,15 +373,10 @@ WiFiClient client;
       } else {
         Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
 
-      }
-
         String payload = https.getString();
         Serial.println(payload);
         
       }
-      
-//
-
       https.end();
     } else {
       Serial.printf("[HTTPS] Unable to connect\n");
@@ -454,7 +393,6 @@ void strclean (unsigned char * src) {
     // Process every source character.
     
       unsigned char *dst = src;
-    
 
     while (*src) {
         // Only copy (and update destination pointer) if suitable.
@@ -468,7 +406,6 @@ void strclean (unsigned char * src) {
     // Finalise destination string.
 
     *dst = '\0';
-//
 }
       void printHex(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
