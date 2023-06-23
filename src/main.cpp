@@ -385,14 +385,24 @@ WiFiClient client;
     if (https.begin(client, address)) {
       https.addHeader("Content-Type", "application/json");
       https.addHeader("Authorization","12345abcdef");
+<<<<<<< Updated upstream
       //https.addHeader("server","Microsoft-IIS/10.0");
       //https.addHeader("Content-Length",String(lenh));
       //https.addHeader("Connection","keep-alive");
       //https.addHeader(" transfer-encoding","chunked");
       //https.addHeader(" x-powered-by","ASP.NET");
+=======
+      https.addHeader("server","Microsoft-IIS/10.0");
+      https.addHeader("Content-Length",String(lenh));
+      https.addHeader("Connection","keep-alive");
+      https.addHeader(" transfer-encoding","chunked");
+      https.addHeader(" x-powered-by","ASP.NET");
+
+>>>>>>> Stashed changes
         // HTTPS
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
+<<<<<<< Updated upstream
       int httpCode = https.POST(output2);
 
 
@@ -401,6 +411,16 @@ WiFiClient client;
         // HTTP header has been send and Server response header has been handled
         Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
 
+=======
+      int httpCode = https.sendRequest("PUT",output2);
+    
+      Serial.println(httpCode);
+
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+
+          
+>>>>>>> Stashed changes
         // file found at server
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           String payload = https.getString();
